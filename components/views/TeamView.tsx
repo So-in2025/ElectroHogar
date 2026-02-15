@@ -418,7 +418,7 @@ const ClientsTable = ({ clients, teamMembers, user }: { clients: Client[], teamM
                                             <span className="text-xs font-medium">{client.lastPurchase}</span>
                                         </div>
                                     </td>
-                                    <td className="p-5 text-right"><span className="font-black text-slate-900">$ {client.totalSpent.toLocaleString()}</p></td>
+                                    <td className="p-5 text-right"><span className="font-black text-slate-900">$ {client.totalSpent.toLocaleString()}</span></td>
                                     <td className="p-5 text-center">
                                         <button onClick={() => setSelectedClient(client)} className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-electro-red border border-slate-200 hover:border-electro-red px-3 py-1 rounded-lg transition-all">
                                             Ver Contacto
@@ -831,7 +831,7 @@ export const TeamView: React.FC<TeamViewProps> = ({ auditLogs, clients: initialC
       {showAddClientModal && createPortal(
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAddClientModal(false)} />
-              <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+              <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
                   <div className="bg-slate-50 p-6 border-b border-slate-100 flex justify-between items-center"><div><h3 className="text-xl font-black italic text-slate-900 uppercase">Nuevo Cliente</h3></div><button onClick={() => setShowAddClientModal(false)} className="p-2 hover:bg-slate-200 rounded-full"><X className="w-5 h-5 text-slate-400" /></button></div>
                   <div className="p-6 space-y-4">
                       <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Completo</label><input type="text" value={newClientForm.name} onChange={e => setNewClientForm({...newClientForm, name: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl border font-bold" placeholder="Ej: Juan Pérez" /></div>
