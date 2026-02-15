@@ -1,0 +1,22 @@
+
+{
+  "name": "Electro Hogar Digital",
+  "short_name": "Omega OS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F5F7",
+  "theme_color": "#0F172A",
+  "description": "Sistema Operativo de Negocios y Ventas Premium.",
+  "icons": [
+    {
+      "src": "https://ui-avatars.com/api/?name=Omega+OS&background=0F172A&color=fff&size=192&rounded=true&bold=true",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://ui-avatars.com/api/?name=Omega+OS&background=0F172A&color=fff&size=512&rounded=true&bold=true",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

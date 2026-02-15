@@ -1,10 +1,12 @@
 
+
 export type Role = 'ADMIN' | 'LEADER' | 'RESELLER';
 export type Environment = 'SIMULATION' | 'PRODUCTION';
 export type PublicationStatus = 'PROGRAMMED' | 'PUBLISHED' | 'CANCELLED';
+export type OrderStatus = 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
 // Removed 'MIGRATION' as it is now part of SETTINGS
-export type View = 'DASHBOARD' | 'CATALOG' | 'TEAM' | 'GAMIFICATION' | 'SETTINGS';
+export type View = 'DASHBOARD' | 'CATALOG' | 'TEAM' | 'GAMIFICATION' | 'SETTINGS' | 'ANALYTICS';
 
 export interface GlobalSettingsState {
   markupPercentage: number;
@@ -45,6 +47,15 @@ export interface IntegrationConfig {
     cloudName: string;
     uploadPreset: string;
   };
+  logistics: {
+    correoArgentino: {
+      isActive: false;
+      cuit: string; // CUIT del cliente corporativo
+      serviceId: string; // ID del servicio contratado
+      apiPassword: string; // Password API
+      testMode: boolean;
+    };
+  };
 }
 
 export interface User {
@@ -56,10 +67,13 @@ export interface User {
   points: number;
   email: string;
   wallet: number; // Saldo pendiente de cobro
+  status?: 'PENDING' | 'ACTIVE' | 'REJECTED'; // New status field
+  activationProofUrl?: string; // URL of the screenshot
   // Extended Profile Data
   phone?: string;
   cbu?: string; // Para retiros
   alias?: string;
+  leaderId?: string; // Who referred/manages them
 }
 
 export interface Product {
@@ -90,7 +104,7 @@ export interface TeamMember {
   id: string;
   name: string;
   role: Role;
-  status: 'ACTIVE' | 'INACTIVE' | 'PENDING';
+  status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'REJECTED';
   salesThisMonth: number;
   activePromos: number;
   lastActive: string;
@@ -102,6 +116,7 @@ export interface TeamMember {
   phone?: string; // Nuevo campo para WhatsApp
   email?: string; // Added field for communication
   leaderId?: string; // ID del líder asignado (si es revendedor)
+  activationProofUrl?: string; // Para que el lider vea la captura
   // New Management Fields
   customCommissionRate?: number; // Override del % global
   accumulatedBonuses?: number; // Bonos extra otorgados
@@ -120,6 +135,32 @@ export interface Client {
   avatar: string;
   interestedIn: string;
   resellerId?: string; // ID del revendedor que gestiona la cuenta
+}
+
+export interface Order {
+  id: string;
+  trackingId: string;
+  date: string;
+  status: OrderStatus;
+  total: number;
+  customer: {
+    name: string;
+    address: string;
+    // Added city property to Order.customer to fix DashboardView property missing error
+    city: string;
+    phone: string;
+    email: string;
+    zipCode: string;
+  };
+  items: {
+    productId: string;
+    productName: string;
+    quantity: number;
+    price: number;
+    image: string;
+  }[];
+  resellerId?: string; // Atribución de venta
+  shippingProvider: string;
 }
 
 export interface Achievement {

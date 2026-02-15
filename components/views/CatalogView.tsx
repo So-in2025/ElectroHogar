@@ -10,7 +10,8 @@ import {
   Box, LayoutTemplate, Trash2, Edit3, 
   LayoutList, Grid, Columns, Filter,
   ArrowUpDown, Hash, Calendar, Layers, Plus, Image as ImageIcon, ChevronDown, ZoomIn, Download, Minus,
-  Zap, Monitor, Gem, Wand2, ImageOff, Share2, Link, Copy, MessageCircle, ArrowRight
+  Zap, Monitor, Gem, Wand2, ImageOff, Share2, Link, Copy, MessageCircle, ArrowRight, Eye, MoreHorizontal,
+  Package, FileText, Tag, Percent, Truck
 } from 'lucide-react';
 
 interface CatalogProps {
@@ -34,13 +35,12 @@ const ProductImage = ({ src, alt, className = "", onClick }: { src?: string, alt
         return (
             <div 
                 onClick={onClick}
-                className={`w-full h-full bg-slate-50 flex flex-col items-center justify-center text-slate-300 gap-2 cursor-pointer group hover:bg-slate-100 transition-colors ${className}`}
+                className={`w-full h-full bg-slate-50 flex flex-col items-center justify-center text-slate-300 gap-2 cursor-pointer ${className}`}
                 title="Haz clic para ver"
             >
-                <div className="p-3 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                    <ImageIcon className="w-6 h-6 text-slate-300 group-hover:text-electro-red transition-colors" />
+                <div className="p-3 bg-white rounded-full shadow-sm">
+                    <ImageIcon className="w-6 h-6 text-slate-300" />
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-600">Ver Producto</span>
             </div>
         );
     }
@@ -101,6 +101,12 @@ const getLogoDataUrl = (colorMode: 'ORIGINAL' | 'WHITE' | 'BLACK' | 'CYAN' | 'GO
 
 // --- DEFINICIÓN DE TEMAS PREMIUM ---
 const THEMES = [
+  // NEW ELITE THEMES
+  { id: 'OBSIDIAN', label: 'Luxe', bgType: 'RADIAL', colors: ['#1c1917', '#000000'], textColor: '#d4af37', priceColor: '#ffffff', logoMode: 'GOLD', fontStyle: 'SERIF', decor: 'GOLD_FRAME' },
+  { id: 'ARCTIC', label: 'Frost', bgType: 'LINEAR', colors: ['#ffffff', '#cbd5e1'], textColor: '#334155', priceColor: '#0f172a', logoMode: 'ORIGINAL', fontStyle: 'CLEAN', decor: 'FROSTED_GLASS' },
+  { id: 'ROYAL', label: 'Royal', bgType: 'RADIAL', colors: ['#4c0519', '#2e1065'], textColor: '#fbcfe8', priceColor: '#fbbf24', logoMode: 'WHITE', fontStyle: 'MODERN', decor: 'ART_DECO' },
+  
+  // EXISTING THEMES (REMASTERED FRAMES)
   { id: 'RED_ELITE', label: 'Red', bgType: 'RADIAL', colors: ['#dc2626', '#7f1d1d'], textColor: '#FFFFFF', priceColor: '#fbbf24', logoMode: 'WHITE', fontStyle: 'MODERN', decor: 'LINES_DIAGONAL' },
   { id: 'TITANIUM', label: 'Titan', bgType: 'LINEAR', colors: ['#374151', '#111827'], textColor: '#F3F4F6', priceColor: '#FFFFFF', logoMode: 'WHITE', fontStyle: 'TECH', decor: 'TECH_HUD' },
   { id: 'CYBER_PUNK', label: 'Cyber', bgType: 'RADIAL', colors: ['#2e1065', '#020617'], textColor: '#e879f9', priceColor: '#22d3ee', logoMode: 'CYAN', fontStyle: 'MODERN', decor: 'CYBER_GRID' },
@@ -114,7 +120,8 @@ const THEMES = [
 // --- SHARE MODAL (REFERRAL SYSTEM) ---
 const ShareModal = ({ product, user, onClose, onOpenStudio, onSimulateSale }: { product: Product, user: User, onClose: () => void, onOpenStudio: () => void, onSimulateSale: () => void }) => {
     const [copied, setCopied] = useState(false);
-    const referralLink = `https://electrohogar.app/p/${product.sku.toLowerCase()}?ref=${user.id}`;
+    // Updated Link format for SPA compatibility (No React Router)
+    const referralLink = `https://electrohogar.app/?sku=${product.sku}&ref=${user.id}`;
     
     const handleCopy = () => {
         navigator.clipboard.writeText(referralLink);
@@ -251,6 +258,43 @@ const ProductGenerator = ({ product, onClose, initialPrice }: { product: Product
           ctx.strokeRect(30, 30, CANVAS_WIDTH-60, CANVAS_HEIGHT-60);
           ctx.strokeStyle = 'rgba(251, 191, 36, 0.2)'; ctx.lineWidth = 1;
           ctx.strokeRect(45, 45, CANVAS_WIDTH-90, CANVAS_HEIGHT-90);
+      } else if (decorType === 'GOLD_FRAME') {
+          // Marco perimetral dorado lujoso
+          ctx.strokeStyle = '#d4af37'; 
+          ctx.lineWidth = 20;
+          ctx.strokeRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          ctx.lineWidth = 2;
+          ctx.strokeRect(40, 40, CANVAS_WIDTH - 80, CANVAS_HEIGHT - 80);
+          
+          // Partículas
+          ctx.fillStyle = '#d4af37';
+          for(let i=0; i<30; i++) {
+              ctx.beginPath();
+              ctx.arc(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT, Math.random() * 3, 0, Math.PI * 2);
+              ctx.fill();
+          }
+      } else if (decorType === 'FROSTED_GLASS') {
+          // Fondo geométrico suave
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.beginPath(); ctx.arc(0, 0, 800, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(CANVAS_WIDTH, CANVAS_HEIGHT, 600, 0, Math.PI * 2); ctx.fill();
+          
+          // Panel de vidrio simulado detrás del área de texto
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 20;
+          ctx.roundRect(50, 1100, CANVAS_WIDTH - 100, 600, 40);
+          ctx.fill();
+      } else if (decorType === 'ART_DECO') {
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+          // Líneas estilo art deco
+          const step = 40;
+          for(let i=0; i<10; i++) {
+              ctx.beginPath();
+              ctx.moveTo(0, CANVAS_HEIGHT - (i*step));
+              ctx.lineTo(CANVAS_WIDTH/2, CANVAS_HEIGHT - (i*step) - 200);
+              ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT - (i*step));
+              ctx.stroke();
+          }
       }
       ctx.restore();
   };
@@ -287,15 +331,105 @@ const ProductGenerator = ({ product, onClose, initialPrice }: { product: Product
     
     img.onload = () => {
         ctx.save();
+        // Sombra general de la "tarjeta"
         ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 60; ctx.shadowOffsetY = 40;
+        
         ctx.beginPath(); ctx.roundRect(containerX, containerY, containerSize, containerSize, radius);
-        ctx.fillStyle = "rgba(0,0,0,0)"; ctx.fill(); ctx.clip();
+        
+        // Si el tema tiene marco decorativo específico, preparamos el fondo
+        if (activeTheme.id === 'OBSIDIAN') {
+            ctx.fillStyle = "#000"; 
+        } else if (activeTheme.id === 'ARCTIC') {
+            ctx.fillStyle = "#ffffff";
+        } else {
+            ctx.fillStyle = "rgba(0,0,0,0)";
+        }
+        
+        ctx.fill(); ctx.clip();
         ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+        
         const scaledWidth = containerSize * scale; const scaledHeight = containerSize * scale;
         const drawX = containerX + (containerSize - scaledWidth) / 2;
         const drawY = containerY + (containerSize - scaledHeight) / 2;
         ctx.drawImage(img, drawX, drawY, scaledWidth, scaledHeight);
         ctx.restore();
+
+        // --- ENMARCADO FÍSICO (STROKE) PARA TODOS LOS TEMAS ---
+        ctx.save();
+        ctx.beginPath(); ctx.roundRect(containerX, containerY, containerSize, containerSize, radius);
+        
+        if (activeTheme.id === 'OBSIDIAN') {
+            ctx.strokeStyle = '#d4af37'; // Oro
+            ctx.lineWidth = 10;
+            ctx.stroke();
+        } else if (activeTheme.id === 'ARCTIC') {
+            ctx.strokeStyle = '#cbd5e1'; // Plata suave
+            ctx.lineWidth = 15;
+            ctx.stroke();
+        } else if (activeTheme.id === 'ROYAL') {
+            ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 20;
+            ctx.strokeStyle = '#fbbf24'; 
+            ctx.lineWidth = 6;
+            ctx.stroke();
+        } else if (activeTheme.id === 'RED_ELITE') {
+            // Marco agresivo rojo
+            ctx.strokeStyle = '#dc2626'; 
+            ctx.lineWidth = 8;
+            ctx.shadowColor = 'rgba(220, 38, 38, 0.5)'; ctx.shadowBlur = 20;
+            ctx.stroke();
+        } else if (activeTheme.id === 'TITANIUM') {
+            // Marco metálico técnico
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            // Línea interior técnica
+            ctx.beginPath(); ctx.roundRect(containerX + 15, containerY + 15, containerSize - 30, containerSize - 30, radius - 5);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; ctx.lineWidth = 2;
+            ctx.stroke();
+        } else if (activeTheme.id === 'CYBER_PUNK') {
+            // Neon Glow
+            ctx.strokeStyle = '#22d3ee'; // Cyan
+            ctx.lineWidth = 6;
+            ctx.shadowColor = '#e879f9'; ctx.shadowBlur = 30; // Pink glow
+            ctx.stroke();
+        } else if (activeTheme.id === 'AURORA_LUX') {
+            // Marco dorado sutil
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)'; 
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        } else if (activeTheme.id === 'VANTABLACK') {
+            // Marco oscuro con detalle
+            ctx.strokeStyle = '#27272a'; // Zinc 800
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            // Línea interior roja fina
+            ctx.beginPath(); ctx.roundRect(containerX + 10, containerY + 10, containerSize - 20, containerSize - 20, radius);
+            ctx.strokeStyle = 'rgba(230, 0, 0, 0.5)'; ctx.lineWidth = 2;
+            ctx.stroke();
+        } else if (activeTheme.id === 'POLAR') {
+            // Marco blanco puro
+            ctx.strokeStyle = '#f8fafc'; // Slate 50
+            ctx.lineWidth = 20;
+            ctx.shadowColor = 'rgba(0,0,0,0.05)'; ctx.shadowBlur = 10;
+            ctx.stroke();
+        } else if (activeTheme.id === 'MIDNIGHT') {
+            // Marco azul profundo con glow
+            ctx.strokeStyle = '#1e3a8a'; // Blue 900
+            ctx.lineWidth = 10;
+            ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 20;
+            ctx.stroke();
+        } else if (activeTheme.id === 'GOLD_RUSH') {
+             // Marco dorado fuerte
+             ctx.strokeStyle = '#b45309';
+             ctx.lineWidth = 12;
+             ctx.stroke();
+             // Detalle exterior
+             ctx.beginPath(); ctx.roundRect(containerX - 10, containerY - 10, containerSize + 20, containerSize + 20, radius + 10);
+             ctx.strokeStyle = 'rgba(180, 83, 9, 0.3)'; ctx.lineWidth = 2;
+             ctx.stroke();
+        }
+        ctx.restore();
+        // -------------------------------------------------------------
 
         let cursorY = containerY + containerSize + 80; 
         ctx.textAlign = "center"; ctx.textBaseline = "top";
@@ -388,7 +522,7 @@ export const CatalogView: React.FC<CatalogProps> = ({ user, onSaleConfirm, produ
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showGenerator, setShowGenerator] = useState(false);
   const [editForm, setEditForm] = useState<Product | null>(null);
-  const [activeTab, setActiveTab] = useState<'VISUAL' | 'DATOS' | 'PRECIO'>('VISUAL');
+  const [activeTab, setActiveTab] = useState<'VISUAL' | 'DETALLE' | 'INVENTARIO' | 'PRECIO'>('VISUAL');
   const [showShareModal, setShowShareModal] = useState(false);
 
   const isAdmin = user.role === 'ADMIN';
@@ -422,33 +556,224 @@ export const CatalogView: React.FC<CatalogProps> = ({ user, onSaleConfirm, produ
 
   const categories = ['TODOS', 'TELEVISORES', 'LAVADO', 'PEQUEÑOS', 'AUDIO'];
 
+  // Definición exacta de clases de grilla según el modo
+  const getGridClass = () => {
+      switch (viewMode) {
+          case 'LIST': return 'space-y-4';
+          case 'GRID_1': return 'grid grid-cols-1 gap-6'; // 1 Columna estricta
+          case 'GRID_2': return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'; // Grilla Responsive Base 2
+          default: return 'grid grid-cols-2 md:grid-cols-3 gap-6';
+      }
+  };
+
+  // Helper for margin calculation in Edit Modal
+  const calculateMargin = (cost: number, sell: number) => {
+      if (cost === 0) return 0;
+      return ((sell - cost) / cost) * 100;
+  };
+
   return (
     <div className="flex flex-col h-full animate-fade-in">
       {showGenerator && selectedProduct && <ProductGenerator product={selectedProduct} initialPrice={applyMarkup(selectedProduct.priceList)} onClose={() => setShowGenerator(false)} />}
       {showShareModal && selectedProduct && !isAdmin && <ShareModal product={selectedProduct} user={user} onClose={() => { setShowShareModal(false); setSelectedProduct(null); }} onOpenStudio={() => { setShowShareModal(false); setShowGenerator(true); }} onSimulateSale={() => onSaleConfirm(selectedProduct, applyMarkup(selectedProduct.priceList))} />}
       
-      {/* EDIT MODAL ADMIN */}
+      {/* ELITE EDIT MODAL ADMIN (REDESIGNED) */}
       {selectedProduct && !showGenerator && !showShareModal && editForm && isAdmin && createPortal(
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedProduct(null)} />
-              <div className="relative bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl animate-scale-up flex flex-col max-h-[90vh]">
-                  <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                      <div><h3 className="text-xl font-black italic text-slate-900 uppercase">{editForm.id ? 'Editar Producto' : 'Nuevo Producto'}</h3></div>
-                      <button onClick={() => setSelectedProduct(null)} className="p-2 hover:bg-slate-100 rounded-full"><X className="w-6 h-6 text-slate-400" /></button>
+          <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center md:p-6">
+              <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md animate-fade-in" onClick={() => setSelectedProduct(null)} />
+              
+              <div className="relative bg-[#F8F9FA] w-full md:max-w-2xl h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-[2.5rem] md:rounded-[3rem] shadow-2xl overflow-hidden animate-slide-in-bottom flex flex-col">
+                  {/* HEADER STICKY */}
+                  <div className="px-8 py-6 bg-white border-b border-slate-100 flex justify-between items-center z-10 sticky top-0">
+                      <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                              {editForm.id && !editForm.id.startsWith('new') ? <Edit3 className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                              {editForm.id && !editForm.id.startsWith('new') ? 'Edición' : 'Creación'}
+                          </p>
+                          <h3 className="text-xl font-black italic text-slate-900 uppercase leading-none">
+                              {editForm.name || 'Nuevo Producto'}
+                          </h3>
+                      </div>
+                      <button onClick={() => setSelectedProduct(null)} className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                          <X className="w-5 h-5 text-slate-500" />
+                      </button>
                   </div>
-                  <div className="flex px-8 border-b border-slate-100">
-                      {['VISUAL', 'DATOS', 'PRECIO'].map((tab) => (
-                          <button key={tab} onClick={() => setActiveTab(tab as any)} className={`py-4 mr-6 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === tab ? 'border-electro-red text-electro-red' : 'border-transparent text-slate-300 hover:text-slate-500'}`}>{tab}</button>
-                      ))}
+
+                  {/* TABS SEGMENTED CONTROL */}
+                  <div className="px-8 pt-6 pb-2 bg-[#F8F9FA]">
+                      <div className="flex bg-slate-200/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+                          {['VISUAL', 'DETALLE', 'INVENTARIO', 'PRECIO'].map((tab) => (
+                              <button 
+                                key={tab} 
+                                onClick={() => setActiveTab(tab as any)} 
+                                className={`flex-1 min-w-[80px] py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                              >
+                                {tab}
+                              </button>
+                          ))}
+                      </div>
                   </div>
-                  <div className="p-8 overflow-y-auto bg-[#F8F9FA]">
-                      {activeTab === 'VISUAL' && <div className="flex flex-col items-center gap-6"><div className="w-64 h-64 bg-white rounded-3xl border-2 border-dashed border-slate-200 flex items-center justify-center p-4 shadow-sm relative group cursor-pointer hover:border-electro-red"><ProductImage src={editForm.image} className="w-full h-full" /><div className="absolute inset-0 bg-black/50 rounded-3xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity"><UploadCloud className="w-8 h-8 mb-2" /><span className="text-[10px] font-bold uppercase">Cambiar Imagen</span></div></div></div>}
-                      {activeTab === 'DATOS' && <div className="space-y-5"><div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Nombre Comercial</label><input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-4 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:border-electro-red outline-none" /></div><div className="grid grid-cols-2 gap-4"><div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">SKU</label><input type="text" value={editForm.sku} onChange={e => setEditForm({...editForm, sku: e.target.value})} className="w-full p-4 rounded-xl border border-slate-200 bg-white font-mono text-xs font-bold text-slate-600" /></div><div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Categoría</label><select value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})} className="w-full p-4 rounded-xl border border-slate-200 bg-white font-bold text-slate-600 outline-none">{categories.filter(c => c !== 'TODOS').map(c => <option key={c} value={c}>{c}</option>)}</select></div></div></div>}
-                      {activeTab === 'PRECIO' && <div className="space-y-6"><div className="bg-slate-900 rounded-2xl p-6 text-white text-center shadow-lg"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Precio Público Final</p><p className="text-4xl font-black italic tracking-tighter">$ {applyMarkup(editForm.priceList).toLocaleString()}</p></div><div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Costo Base (Lista)</label><div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={editForm.priceList} onChange={e => setEditForm({...editForm, priceList: Number(e.target.value)})} className="w-full p-4 pl-8 rounded-xl border border-slate-200 bg-white font-black text-xl text-slate-900 focus:border-electro-red outline-none" /></div></div></div>}
+
+                  {/* CONTENT SCROLLABLE */}
+                  <div className="p-8 overflow-y-auto flex-1">
+                      {activeTab === 'VISUAL' && (
+                          <div className="flex flex-col items-center gap-6 animate-fade-in">
+                              <div className="w-full aspect-square md:w-80 md:h-80 bg-white rounded-[2rem] border-2 border-dashed border-slate-200 flex items-center justify-center p-8 shadow-sm relative group cursor-pointer hover:border-electro-red hover:shadow-lg transition-all">
+                                  <ProductImage src={editForm.image} className="w-full h-full object-contain" />
+                                  <div className="absolute inset-0 bg-slate-900/60 rounded-[2rem] opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity backdrop-blur-sm">
+                                      <UploadCloud className="w-10 h-10 mb-2" />
+                                      <span className="text-[10px] font-bold uppercase tracking-widest">Cambiar Imagen</span>
+                                  </div>
+                              </div>
+                              <div className="text-center w-full max-w-xs">
+                                  <p className="text-xs text-slate-500">Recomendado: PNG Transparente 1080x1080px.</p>
+                                  <div className="mt-4 flex gap-2 justify-center">
+                                      <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase text-slate-600 hover:bg-slate-50"><Link className="w-3 h-3 inline mr-1"/> URL</button>
+                                      <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase text-slate-600 hover:bg-slate-50"><UploadCloud className="w-3 h-3 inline mr-1"/> Subir</button>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                      {activeTab === 'DETALLE' && (
+                          <div className="space-y-5 animate-fade-in">
+                              <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                                  <input 
+                                    type="text" 
+                                    value={editForm.name} 
+                                    onChange={e => setEditForm({...editForm, name: e.target.value})} 
+                                    className="w-full p-4 rounded-2xl border border-slate-200 bg-white font-bold text-slate-900 focus:border-electro-red outline-none shadow-sm text-sm" 
+                                    placeholder="Ej: Smart TV 55 Samsung"
+                                  />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">SKU (Código)</label>
+                                      <input 
+                                        type="text" 
+                                        value={editForm.sku} 
+                                        onChange={e => setEditForm({...editForm, sku: e.target.value})} 
+                                        className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-50 font-mono text-xs font-bold text-slate-600 outline-none" 
+                                      />
+                                  </div>
+                                  <div className="space-y-2">
+                                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Categoría</label>
+                                      <div className="relative">
+                                          <select 
+                                            value={editForm.category} 
+                                            onChange={e => setEditForm({...editForm, category: e.target.value})} 
+                                            className="w-full p-4 rounded-2xl border border-slate-200 bg-white font-bold text-xs text-slate-600 outline-none appearance-none"
+                                          >
+                                              {categories.filter(c => c !== 'TODOS').map(c => <option key={c} value={c}>{c}</option>)}
+                                          </select>
+                                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                      </div>
+                                  </div>
+                              </div>
+                              <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Descripción</label>
+                                  <textarea 
+                                    rows={4}
+                                    value={editForm.description || ''} 
+                                    onChange={e => setEditForm({...editForm, description: e.target.value})} 
+                                    className="w-full p-4 rounded-2xl border border-slate-200 bg-white font-medium text-slate-600 focus:border-electro-red outline-none shadow-sm text-xs resize-none" 
+                                    placeholder="Detalles del producto, características principales..."
+                                  />
+                              </div>
+                          </div>
+                      )}
+
+                      {activeTab === 'INVENTARIO' && (
+                          <div className="space-y-6 animate-fade-in">
+                              <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+                                  <div>
+                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Stock Disponible</p>
+                                      <p className="text-3xl font-black text-slate-900">{editForm.stock} <span className="text-xs text-slate-400 font-bold">Unidades</span></p>
+                                  </div>
+                                  <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
+                                      <button onClick={() => setEditForm({...editForm, stock: Math.max(0, editForm.stock - 1)})} className="w-10 h-10 bg-white shadow-sm rounded-lg flex items-center justify-center hover:text-electro-red"><Minus className="w-4 h-4" /></button>
+                                      <button onClick={() => setEditForm({...editForm, stock: editForm.stock + 1})} className="w-10 h-10 bg-white shadow-sm rounded-lg flex items-center justify-center hover:text-green-600"><Plus className="w-4 h-4" /></button>
+                                  </div>
+                              </div>
+                              
+                              <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between cursor-pointer" onClick={() => setEditForm({...editForm, isPromo: !editForm.isPromo})}>
+                                  <div className="flex items-center gap-4">
+                                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${editForm.isPromo ? 'bg-electro-red text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                          <Zap className="w-6 h-6 fill-current" />
+                                      </div>
+                                      <div>
+                                          <p className="font-bold text-slate-900 text-sm uppercase">Oferta Especial</p>
+                                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Marcar como promoción</p>
+                                      </div>
+                                  </div>
+                                  <div className={`w-14 h-8 rounded-full relative transition-colors duration-300 ${editForm.isPromo ? 'bg-electro-red' : 'bg-slate-200'}`}>
+                                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-sm ${editForm.isPromo ? 'translate-x-7' : 'translate-x-1'}`} />
+                                  </div>
+                              </div>
+
+                              {/* SHIPPING CALCULATOR PREVIEW (NEW) */}
+                              <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 shadow-sm">
+                                  <div className="flex items-center gap-4 mb-4">
+                                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center"><Truck className="w-5 h-5" /></div>
+                                      <div>
+                                          <p className="text-sm font-bold text-blue-900">Calculador de Envío</p>
+                                          <p className="text-[10px] text-blue-600 opacity-70">Vista previa para el cliente</p>
+                                      </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                      <input type="text" placeholder="CP (Ej: 1414)" className="flex-1 p-3 rounded-xl border border-blue-200 text-xs font-bold text-blue-900 outline-none placeholder-blue-300" />
+                                      <button className="bg-blue-600 text-white px-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700">Calcular</button>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                      {activeTab === 'PRECIO' && (
+                          <div className="space-y-6 animate-fade-in">
+                              <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white text-center shadow-xl relative overflow-hidden">
+                                  <div className="absolute top-0 right-0 w-32 h-32 bg-electro-red opacity-20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Precio Público Final</p>
+                                  <div className="relative inline-block">
+                                      <input 
+                                        type="number" 
+                                        value={editForm.priceList} 
+                                        onChange={e => setEditForm({...editForm, priceList: Number(e.target.value)})} 
+                                        className="bg-transparent text-5xl font-black italic tracking-tighter text-center w-full outline-none placeholder-slate-700"
+                                      />
+                                      <span className="absolute -left-6 top-2 text-lg text-slate-500 font-bold">$</span>
+                                  </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Costo Base</p>
+                                      <div className="relative">
+                                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">$</span>
+                                          <input 
+                                            type="number" 
+                                            value={Math.round(editForm.priceList * 0.7)} // Simulado si no hay campo costo real
+                                            disabled
+                                            className="w-full p-3 pl-6 rounded-xl bg-slate-50 border-none font-bold text-slate-500 text-sm" 
+                                          />
+                                      </div>
+                                  </div>
+                                  <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Margen Estimado</p>
+                                      <div className="flex items-center gap-2 h-full pb-2">
+                                          <Percent className="w-4 h-4 text-green-500" />
+                                          <span className="text-xl font-black text-green-600">30%</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
                   </div>
-                  <div className="p-6 bg-white border-t border-slate-100 flex gap-4">
-                      <Button variant="outline" fullWidth onClick={() => setSelectedProduct(null)} className="h-14 border-slate-200 text-slate-500">CANCELAR</Button>
-                      <Button fullWidth onClick={() => { setSelectedProduct(null); }} className="h-14 bg-slate-900 text-white shadow-xl">GUARDAR PRODUCTO</Button>
+
+                  {/* FOOTER ACTIONS */}
+                  <div className="p-6 bg-white border-t border-slate-100 flex gap-4 z-10 sticky bottom-0 safe-area-pb">
+                      <Button variant="outline" fullWidth onClick={() => setSelectedProduct(null)} className="h-14 rounded-2xl border-slate-200 text-slate-500 hover:bg-slate-50 font-black uppercase text-xs">CANCELAR</Button>
+                      <Button fullWidth onClick={() => { setSelectedProduct(null); }} className="h-14 rounded-2xl bg-slate-900 text-white shadow-xl hover:bg-black font-black uppercase text-xs">GUARDAR CAMBIOS</Button>
                   </div>
               </div>
           </div>, document.body
@@ -483,18 +808,76 @@ export const CatalogView: React.FC<CatalogProps> = ({ user, onSaleConfirm, produ
       {/* PRODUCT LIST */}
       <div className="flex-1 overflow-y-auto pb-32 pr-2">
           {filteredProducts.length > 0 ? (
-              <div className={viewMode === 'LIST' ? 'space-y-4' : `grid gap-6 ${viewMode === 'GRID_2' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 md:grid-cols-2'}`}>
+              <div className={getGridClass()}>
                   {filteredProducts.map((product, idx) => (
-                      <div key={product.id} onClick={() => handleProductClick(product)} className={`bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col animate-fade-in-up`} style={{animationDelay: `${idx * 0.05}s`}}>
-                          <div className="relative aspect-square bg-white p-6 flex items-center justify-center border-b border-slate-50">
+                      <div 
+                        key={product.id} 
+                        onClick={() => handleProductClick(product)} 
+                        className={`bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group animate-fade-in-up ${viewMode === 'LIST' ? 'flex flex-row items-stretch min-h-[140px]' : 'flex flex-col'}`} 
+                        style={{animationDelay: `${idx * 0.05}s`}}
+                      >
+                          {/* VISUAL PART */}
+                          <div className={`relative bg-white flex items-center justify-center border-b border-slate-50 ${viewMode === 'LIST' ? 'w-32 shrink-0 border-r border-b-0 p-4' : 'aspect-square p-6'}`}>
                               <ProductImage src={product.image} className="w-full h-full group-hover:scale-110 transition-transform duration-500" />
                               {product.isPromo && <div className="absolute top-4 left-4 bg-electro-red text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Promo</div>}
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]"><button onClick={(e) => handleStudio(e, product)} className="px-6 py-3 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-electro-red hover:text-white transition-colors flex items-center gap-2 shadow-2xl transform hover:scale-105"><Palette className="w-4 h-4" /> Crear Diseño</button></div>
+                              
+                              {/* ACTION DOCK (ALWAYS VISIBLE IN GRID - FIX) */}
+                              {viewMode !== 'LIST' && (
+                                  <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-100">
+                                      <button 
+                                        onClick={(e) => handleStudio(e, product)} 
+                                        className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-electro-red transition-colors shadow-md"
+                                        title="Crear Diseño"
+                                      >
+                                          <Palette className="w-5 h-5" />
+                                      </button>
+                                      {isAdmin && (
+                                          <>
+                                            <button onClick={(e) => {e.stopPropagation(); handleProductClick(product)}} className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-slate-200 flex items-center justify-center hover:text-blue-600 transition-colors">
+                                                <Edit3 className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={(e) => {e.stopPropagation(); alert("Función de borrar (Simulada)")}} className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-slate-200 flex items-center justify-center hover:text-red-600 transition-colors">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                          </>
+                                      )}
+                                  </div>
+                              )}
                           </div>
-                          <div className="p-6 flex flex-col flex-1">
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{product.category}</p>
-                              <h3 className="font-bold text-slate-900 text-sm leading-snug mb-4 line-clamp-2 min-h-[2.5em]">{product.name}</h3>
-                              <div className="mt-auto"><p className="text-[10px] font-bold text-slate-400 uppercase">Precio Final</p><p className="text-2xl font-black text-slate-900 italic tracking-tighter">$ {applyMarkup(product.priceList).toLocaleString()}</p></div>
+
+                          {/* INFO PART */}
+                          <div className={`p-5 flex flex-col flex-1 ${viewMode === 'LIST' ? 'justify-between relative' : ''}`}>
+                              <div>
+                                  <div className="flex justify-between items-start">
+                                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{product.category}</p>
+                                      {/* GRID MODE: PRICE TOP RIGHT OPTIONAL or Just remove to keep bottom */}
+                                  </div>
+                                  <h3 className={`font-bold text-slate-900 text-sm leading-snug ${viewMode !== 'LIST' ? 'line-clamp-2 min-h-[2.5em] mb-4' : 'line-clamp-1 mb-1'}`}>{product.name}</h3>
+                              </div>
+
+                              <div className={`${viewMode === 'LIST' ? '' : 'mt-auto'}`}>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Precio Final</p>
+                                  <p className="text-2xl font-black text-slate-900 italic tracking-tighter">$ {applyMarkup(product.priceList).toLocaleString()}</p>
+                              </div>
+
+                              {/* LIST VIEW ACTIONS (MOBILE OPTIMIZED: FLOW LAYOUT) */}
+                              {viewMode === 'LIST' && (
+                                  <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-slate-50">
+                                      <button onClick={(e) => handleStudio(e, product)} className="h-9 px-3 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-electro-red transition-colors shadow-md">
+                                          <Palette className="w-3 h-3" /> <span className="hidden sm:inline">Studio</span>
+                                      </button>
+                                      {isAdmin && (
+                                          <>
+                                              <button onClick={(e) => {e.stopPropagation(); handleProductClick(product)}} className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all flex items-center justify-center">
+                                                  <Edit3 className="w-4 h-4" />
+                                              </button>
+                                              <button onClick={(e) => {e.stopPropagation(); alert("Borrar")}} className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 transition-all flex items-center justify-center">
+                                                  <Trash2 className="w-4 h-4" />
+                                              </button>
+                                          </>
+                                      )}
+                                  </div>
+                              )}
                           </div>
                       </div>
                   ))}

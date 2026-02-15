@@ -7,7 +7,8 @@ import {
   LogOut, ChevronRight, Zap, Percent, Database, 
   ShieldAlert, Globe, Briefcase, Lock, 
   Settings as SettingsIcon, BarChart, Users, Image as ImageIcon,
-  DollarSign, Power, Search, AlertTriangle, Check, CreditCard, Cloud, Key, UploadCloud, ArrowRight, MessageCircle, Phone, Tag, BrainCircuit, RefreshCw
+  DollarSign, Power, Search, AlertTriangle, Check, CreditCard, Cloud, Key, UploadCloud, ArrowRight, MessageCircle, Phone, Tag, BrainCircuit, RefreshCw,
+  Truck, Package
 } from 'lucide-react';
 import { User as UserType, GlobalSettingsState, IntegrationConfig, Product } from '../../types';
 import { MOCK_TEAM } from '../../constants';
@@ -30,7 +31,7 @@ const Toggle = ({ active, onToggle, color = 'bg-electro-red' }: { active: boolea
   </button>
 );
 
-// --- COMPONENTE: IMPORTACIÓN DE DATOS (REAL) ---
+// --- COMPONENTE: IMPORTACIÓN DE DATOS (REAL & INTELLIGENT) ---
 const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => void }) => {
     const [step, setStep] = useState(1);
     const [progress, setProgress] = useState(0);
@@ -38,18 +39,38 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
     const [fileType, setFileType] = useState<'CSV' | 'EXCEL' | 'UNKNOWN'>('UNKNOWN');
     const [processedProducts, setProcessedProducts] = useState<Product[]>([]);
     
-    // Referencia al input file oculto
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Detección Inteligente de Fila de Encabezados
+    const findHeaderRowIndex = (rows: any[]) => {
+        // Palabras clave que suelen estar en un header de productos
+        const keywords = ['sku', 'codigo', 'código', 'id', 'producto', 'nombre', 'precio', 'costo', 'valor', 'stock', 'cantidad'];
+        
+        for (let i = 0; i < Math.min(rows.length, 15); i++) {
+            const rowStr = Array.isArray(rows[i]) 
+                ? rows[i].map((c: any) => String(c).toLowerCase()).join(' ')
+                : String(rows[i]).toLowerCase();
+            
+            // Si la fila contiene al menos 2 palabras clave, es muy probable que sea el header
+            const matches = keywords.filter(k => rowStr.includes(k));
+            if (matches.length >= 2) {
+                return i;
+            }
+        }
+        return 0; // Fallback a la primera fila si no detecta nada
+    };
 
     // LOGICA CSV
     const processCSV = (text: string) => {
-        const lines = text.split('\n');
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
         if (lines.length < 2) return []; 
-        const firstLine = lines[0];
-        const separator = firstLine.includes(';') ? ';' : ',';
-        const headers = firstLine.split(separator).map(h => h.trim().toLowerCase());
         
-        return parseRows(lines.slice(1), headers, separator);
+        const headerIndex = findHeaderRowIndex(lines);
+        const headerLine = lines[headerIndex];
+        const separator = headerLine.includes(';') ? ';' : ',';
+        const headers = headerLine.split(separator).map(h => h.trim().toLowerCase());
+        
+        return mapDataToProducts(lines.slice(headerIndex + 1), headers);
     };
 
     // LOGICA EXCEL (REAL)
@@ -58,12 +79,10 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
             const rows = await readXlsxFile(file);
             if (rows.length < 2) return [];
             
-            // Fila 0 son headers
-            const headers = rows[0].map((h: any) => String(h).trim().toLowerCase());
+            const headerIndex = findHeaderRowIndex(rows);
+            const headers = rows[headerIndex].map((h: any) => String(h).trim().toLowerCase());
             
-            // Convertir filas restantes a string para reutilizar lógica o procesar directo
-            // Aquí procesamos directo mapeando los indices
-            return mapDataToProducts(rows.slice(1), headers);
+            return mapDataToProducts(rows.slice(headerIndex + 1), headers);
         } catch (error) {
             console.error("Error leyendo Excel:", error);
             return [];
@@ -72,12 +91,28 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
 
     // Helper unificado para mapear datos a Productos
     const mapDataToProducts = (rows: any[], headers: string[]) => {
-        const idxSKU = headers.findIndex(h => h.includes('sku') || h.includes('codigo') || h.includes('id'));
-        const idxName = headers.findIndex(h => h.includes('nombre') || h.includes('producto') || h.includes('descripcion') || h.includes('titulo'));
-        const idxPrice = headers.findIndex(h => h.includes('precio') || h.includes('costo') || h.includes('valor'));
-        const idxStock = headers.findIndex(h => h.includes('stock') || h.includes('cantidad') || h.includes('disponible'));
-        const idxCat = headers.findIndex(h => h.includes('categoria') || h.includes('rubro') || h.includes('familia'));
-        const idxImg = headers.findIndex(h => h.includes('imagen') || h.includes('foto') || h.includes('url'));
+        // Mapeo flexible de columnas
+        const idxSKU = headers.findIndex(h => h.includes('sku') || h.includes('codigo') || h.includes('código') || h.includes('id') || h.includes('articulo'));
+        const idxName = headers.findIndex(h => h.includes('nombre') || h.includes('producto') || h.includes('descripcion') || h.includes('descripción') || h.includes('titulo') || h.includes('detalle'));
+        const idxPrice = headers.findIndex(h => h.includes('precio') || h.includes('costo') || h.includes('valor') || h.includes('venta') || h.includes('final') || h.includes('pvp'));
+        const idxStock = headers.findIndex(h => h.includes('stock') || h.includes('cantidad') || h.includes('disponible') || h.includes('existencia') || h.includes('saldo'));
+        
+        // Expanded Category Matchers (Pedix suele usar Rubro)
+        const idxCat = headers.findIndex(h => 
+            h.includes('categoria') || 
+            h.includes('categoría') || 
+            h.includes('rubro') || 
+            h.includes('familia') ||
+            h.includes('linea') ||
+            h.includes('línea') ||
+            h.includes('grupo') ||
+            h.includes('seccion') ||
+            h.includes('sección') ||
+            h.includes('departamento') ||
+            h.includes('clasificacion')
+        );
+        
+        const idxImg = headers.findIndex(h => h.includes('imagen') || h.includes('foto') || h.includes('url') || h.includes('img') || h.includes('link'));
 
         const products: Product[] = [];
 
@@ -86,35 +121,45 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
              let cols: any[] = [];
              if (typeof row === 'string') { // CSV
                  if (!row.trim()) return;
-                 // Hack simple para CSV (no maneja comas dentro de comillas perfectamente, pero sirve para exports simples)
-                 cols = row.split(headers.length > 1 ? (row.includes(';') ? ';' : ',') : ',').map(c => c.trim().replace(/^"|"$/g, ''));
+                 // Hack simple para CSV
+                 const separator = row.includes(';') ? ';' : ',';
+                 cols = row.split(separator).map(c => c.trim().replace(/^"|"$/g, ''));
              } else { // Excel (Array)
                  cols = row;
              }
              
+             // Validación mínima: Si no tiene datos suficientes, saltar
              if (cols.length < 2) return;
 
              const name = idxName > -1 ? String(cols[idxName]) : `Producto Importado ${i+1}`;
-             
+             if (!name || name === 'null' || name.trim() === '') return; // Skip filas vacías
+
              // Price Parsing
              let price = 0;
              if (idxPrice > -1) {
                  const rawPrice = cols[idxPrice];
                  if (typeof rawPrice === 'number') price = rawPrice;
                  else if (typeof rawPrice === 'string') {
-                     // Limpiar moneda
                      price = parseFloat(rawPrice.replace(/[^\d.,-]/g, '').replace(',', '.'));
                  }
              }
 
-             const stock = idxStock > -1 ? parseInt(String(cols[idxStock])) : 0;
-             const cat = idxCat > -1 ? String(cols[idxCat]) : 'Varios';
+             const stock = idxStock > -1 ? parseInt(String(cols[idxStock]).replace(/\D/g, '')) || 0 : 0;
              
-             // IMAGEN - LÓGICA LIMPIA
-             // Si viene en el archivo, la usamos. Si no, vacío.
+             // Categoría Clean
+             let cat = 'Varios';
+             if (idxCat > -1) {
+                 const rawCat = String(cols[idxCat]).trim();
+                 if (rawCat && rawCat !== 'null' && rawCat !== 'undefined' && rawCat.length > 1) {
+                     // Capitalize: "TELEVISORES" -> "Televisores"
+                     cat = rawCat.charAt(0).toUpperCase() + rawCat.slice(1).toLowerCase();
+                 }
+             }
+             
+             // Imagen
              let image = idxImg > -1 ? String(cols[idxImg]) : '';
              if (image === 'null' || image === 'undefined' || image.length < 5) {
-                 image = ''; // Dejar vacío para que el Catálogo muestre el placeholder "SIN IMAGEN"
+                 image = ''; 
              }
 
              products.push({
@@ -124,7 +169,7 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
                 description: 'Importado masivamente.',
                 priceList: price || 0,
                 priceReseller: (price || 0) * 0.85, 
-                stock: stock || 0,
+                stock: stock,
                 category: cat,
                 image: image,
                 isPromo: false,
@@ -136,7 +181,7 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
     
     // Legacy CSV parser wrapper
     const parseRows = (rows: string[], headers: string[], separator: string) => {
-        // En CSV pasamos rows como strings, el mapDataToProducts lo maneja
+        // Deprecated internal usage, mapped to main function
         return mapDataToProducts(rows, headers); 
     }
 
@@ -144,8 +189,6 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // VALIDACIÓN MANUAL DE EXTENSIÓN (Solución Android "Gray Files")
-        // Al usar accept="*" el sistema deja elegir todo. Aquí filtramos.
         const fileNameLower = file.name.toLowerCase();
         const isValid = fileNameLower.endsWith('.csv') || 
                         fileNameLower.endsWith('.txt') || 
@@ -154,7 +197,7 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
 
         if (!isValid) {
             alert("⚠️ Formato no compatible.\n\nPor favor selecciona un archivo Excel (.xlsx, .xls) o CSV.");
-            if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
+            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
@@ -253,7 +296,7 @@ const DataImportPanel = ({ onComplete }: { onComplete: (products: Product[]) => 
                              <div>
                                  <p className="font-bold text-xs text-green-800">Lectura Completada</p>
                                  <p className="text-[10px] text-green-600">
-                                     {processedProducts.length} productos listos para importar.
+                                     {processedProducts.length} productos identificados correctamente.
                                  </p>
                              </div>
                          </div>
@@ -322,6 +365,7 @@ export const SettingsView: React.FC<SettingsProps> = ({ user, globalSettings, se
       updateTemplate(templateKey, current + ` {{${variable}}} `);
   };
   
+  // Generic update for nested config
   const updateIntegration = (provider: 'mercadoPago' | 'firebase' | 'cloudinary', field: string, value: any) => {
     setIntegrationConfig(prev => ({
         ...prev,
@@ -330,6 +374,20 @@ export const SettingsView: React.FC<SettingsProps> = ({ user, globalSettings, se
             [field]: value
         }
     }));
+  };
+
+  // Specific update for deeply nested logistics
+  const updateLogistics = (field: string, value: any) => {
+      setIntegrationConfig(prev => ({
+          ...prev,
+          logistics: {
+              ...prev.logistics,
+              correoArgentino: {
+                  ...prev.logistics.correoArgentino,
+                  [field]: value
+              }
+          }
+      }));
   };
 
   const handleCheckInflation = async () => {
@@ -688,6 +746,88 @@ export const SettingsView: React.FC<SettingsProps> = ({ user, globalSettings, se
             {/* TAB: INTEGRATIONS */}
             {activeTab === 'INTEGRATION' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-in">
+                    
+                    {/* CORREO ARGENTINO (NEW LOGISTICS CORE) */}
+                    <div className="lg:col-span-2">
+                        <Card className="p-8 rounded-[2.5rem] border-slate-200 shadow-xl bg-slate-900 relative overflow-hidden text-white">
+                            {/* Decor */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400 opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                            
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 bg-yellow-400 text-blue-900 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-400/20">
+                                        <Truck className="w-7 h-7" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Logística & Envíos</h3>
+                                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1 flex items-center gap-2">
+                                            Powered by <span className="text-yellow-400">Correo Argentino</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Estado Módulo</span>
+                                    <Toggle 
+                                        active={integrationConfig.logistics?.correoArgentino?.isActive || false} 
+                                        onToggle={() => updateLogistics('isActive', !integrationConfig.logistics?.correoArgentino?.isActive)} 
+                                        color="bg-yellow-400"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">CUIT Corporativo</label>
+                                    <input 
+                                        type="text" 
+                                        value={integrationConfig.logistics?.correoArgentino?.cuit || ''} 
+                                        onChange={(e) => updateLogistics('cuit', e.target.value)} 
+                                        placeholder="30-..." 
+                                        className="w-full p-4 bg-white/10 border border-white/10 rounded-xl outline-none text-xs font-mono text-white focus:border-yellow-400 transition-colors" 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Service ID (API)</label>
+                                    <input 
+                                        type="text" 
+                                        value={integrationConfig.logistics?.correoArgentino?.serviceId || ''} 
+                                        onChange={(e) => updateLogistics('serviceId', e.target.value)} 
+                                        placeholder="CORREO-API-ID" 
+                                        className="w-full p-4 bg-white/10 border border-white/10 rounded-xl outline-none text-xs font-mono text-white focus:border-yellow-400 transition-colors" 
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Password API</label>
+                                    <div className="flex items-center gap-2 p-4 bg-white/10 border border-white/10 rounded-xl focus-within:border-yellow-400 transition-colors">
+                                        <Key className="w-4 h-4 text-slate-400" />
+                                        <input 
+                                            type="password" 
+                                            value={integrationConfig.logistics?.correoArgentino?.apiPassword || ''} 
+                                            onChange={(e) => updateLogistics('apiPassword', e.target.value)} 
+                                            placeholder="••••••••" 
+                                            className="w-full bg-transparent outline-none text-xs font-mono text-white" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-center relative z-10">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${integrationConfig.logistics?.correoArgentino?.testMode ? 'bg-amber-400 animate-pulse' : 'bg-green-500'}`}></div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                        {integrationConfig.logistics?.correoArgentino?.testMode ? 'Modo Pruebas (Sandbox)' : 'Producción (Live)'}
+                                    </span>
+                                </div>
+                                <button 
+                                    onClick={() => updateLogistics('testMode', !integrationConfig.logistics?.correoArgentino?.testMode)}
+                                    className="text-[9px] font-black uppercase tracking-widest text-white/50 hover:text-white underline decoration-dashed"
+                                >
+                                    Cambiar Modo
+                                </button>
+                            </div>
+                        </Card>
+                    </div>
+
                     {/* MERCADO PAGO */}
                     <Card className="p-8 rounded-[2.5rem] border-slate-200 shadow-xl bg-white">
                         <div className="flex items-center gap-4 mb-8">
@@ -770,7 +910,7 @@ export const SettingsView: React.FC<SettingsProps> = ({ user, globalSettings, se
         </div>
 
         {/* FLOATING SAVE DOCK (ALWAYS VISIBLE) */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 pointer-events-none">
+        <div className="fixed bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 pointer-events-none">
             <div className="pointer-events-auto bg-white/80 backdrop-blur-xl border border-white/20 p-2 rounded-2xl shadow-2xl shadow-black/20 transform hover:scale-[1.02] transition-transform">
                <Button onClick={handleSave} className="w-full h-14 rounded-xl bg-slate-900 text-white shadow-lg hover:shadow-xl hover:bg-black font-black italic uppercase tracking-widest text-sm flex items-center justify-center gap-2" disabled={saving}>
                   {saving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}

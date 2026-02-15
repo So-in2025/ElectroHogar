@@ -3,8 +3,37 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0F172A" />
+    
+    <!-- SEO & Identity -->
     <title>Electro Hogar Digital | OMEGA SYSTEM</title>
+    <meta name="description" content="Plataforma premium de gestión retail, ventas y catálogo digital. Potenciada por Omega OS." />
+    <meta name="keywords" content="electro, hogar, digital, ventas, retail, sistema, gestión, omega" />
+    <meta name="author" content="Omega Systems" />
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://electrohogar.app/" />
+    <meta property="og:title" content="Electro Hogar Digital | Tecnología Premium" />
+    <meta property="og:description" content="Accede al catálogo exclusivo de electrodomésticos y tecnología. Gestión de ventas y red de revendedores en tiempo real." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=630&q=80" />
+    <meta property="og:image:alt" content="Electro Hogar Digital Dashboard" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://electrohogar.app/" />
+    <meta property="twitter:title" content="Electro Hogar Digital | Omega OS" />
+    <meta property="twitter:description" content="El sistema operativo definitivo para tu negocio de retail. Ventas, stock y equipo en un solo lugar." />
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=630&q=80" />
+
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Omega OS" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=Omega+OS&background=0F172A&color=fff&size=192&rounded=true&bold=true" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script>
@@ -94,6 +123,15 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.41.0"
   }
 }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Omega Service Worker registrado'))
+        .catch(err => console.log('Error SW:', err));
+    });
+  }
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
