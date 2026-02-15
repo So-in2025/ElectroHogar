@@ -219,7 +219,7 @@ const AdminDashboard = ({ simulationMode, onNavigate, stats, teamMembers = [], a
                               <div className="font-black text-slate-300 w-4 text-center text-xs italic">#{index + 1}</div>
                               <img src={seller.avatar} className="w-10 h-10 rounded-xl object-cover border border-slate-100" alt="" />
                               <div className="flex-1">
-                                  <div className="flex justify-between items-end mb-1"><span className="text-xs font-bold text-slate-900 uppercase">{seller.name}</span><span className="text-xs font-black text-slate-900">$ {seller.salesThisMonth.toLocaleString()}</p></div>
+                                  <div className="flex justify-between items-end mb-1"><span className="text-xs font-bold text-slate-900 uppercase">{seller.name}</span><span className="text-xs font-black text-slate-900">$ {seller.salesThisMonth.toLocaleString()}</span></div>
                                   <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden"><div className={`h-full rounded-full ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-slate-400' : 'bg-orange-400'}`} style={{ width: `${percent}%` }}></div></div>
                               </div>
                               {index === 0 && <Medal className="w-5 h-5 text-yellow-400 shrink-0" />}
