@@ -1,0 +1,7 @@
+{
+  "name": "Electro Hogar Digital",
+  "description": "Plataforma premium de gestión de ventas, revendedores y catálogo para electrodomésticos.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
